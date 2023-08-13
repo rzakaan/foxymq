@@ -1,3 +1,5 @@
+package template;
+
 import org.foxymq.annotation.ArraySizeField;
 import org.foxymq.annotation.MessageId;
 import org.foxymq.message.Message;

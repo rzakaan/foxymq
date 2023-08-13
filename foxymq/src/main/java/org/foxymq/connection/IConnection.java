@@ -97,7 +97,7 @@ public abstract class IConnection {
                 Socket socket = clients.get(port);
                 OutputStream outputStream = socket.getOutputStream();
 
-                byte[] bytes = message.encode();
+                byte[] bytes = message.encodeMessage();
                 outputStream.write(bytes);
                 // outputStream.close();
             } catch (Exception e ) {

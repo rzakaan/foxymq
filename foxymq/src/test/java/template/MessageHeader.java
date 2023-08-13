@@ -1,3 +1,5 @@
+package template;
+
 import org.foxymq.message.IMessageHeader;
 import org.foxymq.message.Message;
 

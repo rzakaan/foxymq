@@ -17,60 +17,39 @@ public class Message extends IMessage {
     public Message() {
     }
 
-    @Override
-    public byte[] encode() {
+    public byte[] encodeMessage() {
         // set sizes
-        Class clazz = getClass();
         int payloadSize = getSize();
         int headerSize = messageHeader.getSize();
-        int messageSize = payloadSize + headerSize;
+        int totalSize = payloadSize + headerSize;
 
         // buffer and message header
-        buffer = ByteBuffer.allocate(messageSize);
+        buffer = ByteBuffer.allocate(totalSize);
         buffer.order(byteOrder);
 
         // encode message header
         buffer.put(messageHeader.encode());
-
-        System.out.println(String.format("%s size:%d", getClass().getName(), messageSize));
-
-        Field[] fields = clazz.getDeclaredFields();
-        parentLoop:
-        for (Field field : fields) {
-            try {
-                field.setAccessible(true);
-                Object obj = field.get(this);
-
-                // System.out.println("Field: " + field.getName() + " = " + obj.toString());
-
-                Annotation[] annotations = field.getDeclaredAnnotations();
-                for(Annotation a : annotations) {
-                    // System.out.println("Annotation :" + a.annotationType() + " : " + a.toString());
-                    if (a instanceof MessageId)
-                        continue parentLoop;
-                }
-
-                if (obj instanceof Byte ) buffer.put((Byte) obj);
-                else if (obj instanceof Short ) buffer.putShort((Short) obj);
-                else if (obj instanceof Integer ) buffer.putInt((Integer) obj);
-                else if (obj instanceof Long ) buffer.putLong((Long) obj);
-                else if (obj instanceof Float ) buffer.putFloat((Float) obj);
-                else if (obj instanceof Double ) buffer.putDouble((Double) obj);
-                else if (obj instanceof Character ) buffer.putChar((Character) obj);
-                else if (obj instanceof Boolean ) {
-                    byte v = (Boolean) obj ? (byte) 1 : 0;
-                    buffer.put(v);
-                }
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        buffer.put(encode());
 
         return buffer.array();
     }
 
-    @Override
-    public void decode(byte[] buffer) {
+    public void decodeMessage(byte[] buffer) {
 
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder str = new StringBuilder();
+        str.append(String.format("%s\n",getClass().getName()));
+        str.append(String.format("  |-> header size  : %d\n", messageHeader.getSize()));
+        str.append(String.format("  |-> total size   : %d\n", getSize()));
+        str.append(String.format("  |-> byte buffer  : "));
+        for(byte b : buffer.array()) {
+            str.append(String.format("%X ", b));
+        }
+        str.append("\n");
+
+        return str.toString();
     }
 }
