@@ -1,8 +1,5 @@
 package org.foxymq.message;
 
-import java.lang.reflect.Field;
-import java.nio.ByteBuffer;
-
-public abstract class IMessageHeader extends IMessage {
+public abstract class IMessageHeader extends MessageEncoder {
     protected abstract Message createMessage();
 }
