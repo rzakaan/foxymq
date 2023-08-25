@@ -1,19 +1,20 @@
 package message;
 
 import org.junit.jupiter.api.Test;
-import template.MessageHeader;
-import template.MessageTest;
+import template.MsgHeader;
+import template.MsgTest;
 
 public class TestMessage {
     @Test
     public void TestMessageEncode() {
-        MessageHeader header = new MessageHeader();
+        // message header
+        MsgHeader header = new MsgHeader();
         header.messageId = 7;
-        MessageTest messageTest = new MessageTest();
-        messageTest.setMessageHeader(header);
 
-        // ByteBuffer buffer = ByteBuffer.allocate(bytes);
-        byte[] bytes = messageTest.encodeMessage();
-        System.out.println(messageTest);
+        // message body
+        MsgTest msg = new MsgTest();
+        msg.setMessageHeader(header);
+        byte[] bytes = msg.encodeMessage();
+        System.out.println(msg);
     }
 }

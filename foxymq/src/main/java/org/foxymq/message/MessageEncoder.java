@@ -6,6 +6,8 @@ import lombok.Setter;
 import lombok.AccessLevel;
 
 import org.foxymq.annotation.MessageId;
+import org.foxymq.annotation.PayloadSize;
+import org.foxymq.annotation.TotalSize;
 import org.foxymq.annotation.ByPass;
 
 import java.lang.annotation.Annotation;
@@ -32,10 +34,16 @@ public abstract class MessageEncoder {
         this.byteOrder = ByteOrder.BIG_ENDIAN;
     }
 
+    protected void initBuffer(int size) {
+        if (buffer == null) {
+            buffer = ByteBuffer.allocate(size);
+        }
+    }
+
     protected byte[] encode() {
         // calculate size
         int size = getSize();
-        buffer = ByteBuffer.allocate(size);
+        initBuffer(size);
 
         Class clazz = getClass();
         Field[] fields = clazz.getDeclaredFields();
@@ -48,9 +56,8 @@ public abstract class MessageEncoder {
 
                 Annotation[] annotations = field.getDeclaredAnnotations();
                 for (Annotation a : annotations) {
-                    // System.out.println("Annotation :" + a.annotationType() + " : " +
-                    // a.toString());
-                    if (a instanceof MessageId || a instanceof ByPass) {
+                    if (a instanceof MessageId || a instanceof ByPass
+                            || a instanceof PayloadSize || a instanceof TotalSize) {
                         continue parentLoop;
                     }
                 }
@@ -100,14 +107,14 @@ public abstract class MessageEncoder {
                 for (Annotation a : annotations) {
                     // System.out.println("Annotation :" + a.annotationType() + " : " +
                     // a.toString());
-                    if (a instanceof MessageId)
+                    if (a instanceof MessageId || a instanceof ByPass) {
                         continue FieldLoop;
+                    }
                 }
 
                 if (obj instanceof Byte || obj instanceof Boolean) {
                     size++;
-                }
-                if (obj instanceof Character) {
+                } else if (obj instanceof Character) {
                     size += 2;
                 } else if (obj instanceof Short) {
                     size += 2;
@@ -121,8 +128,9 @@ public abstract class MessageEncoder {
                 } else if (obj instanceof Enumeration) {
                     size++;
                 } else if (obj instanceof IMessageHeader) {
-                    // array found
-                    size += getSize(obj.getClass());
+                    continue FieldLoop;
+                    // size += getSize(obj.getClass());
+                    // change implement
                 } else if (obj instanceof Object[]) {
                     // array found
                     size += ((Object[]) obj).length;

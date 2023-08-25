@@ -7,7 +7,7 @@ import org.foxymq.message.Message;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MessageArray extends Message {
+public class MsgArray extends Message {
     @MessageId
     public static final int messageId = 2;
 
