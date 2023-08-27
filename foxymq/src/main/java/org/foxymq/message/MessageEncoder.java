@@ -56,8 +56,7 @@ public abstract class MessageEncoder {
 
                 Annotation[] annotations = field.getDeclaredAnnotations();
                 for (Annotation a : annotations) {
-                    if (a instanceof MessageId || a instanceof ByPass
-                            || a instanceof PayloadSize || a instanceof TotalSize) {
+                    if (isPassField(a)) {
                         continue parentLoop;
                     }
                 }
@@ -107,7 +106,7 @@ public abstract class MessageEncoder {
                 for (Annotation a : annotations) {
                     // System.out.println("Annotation :" + a.annotationType() + " : " +
                     // a.toString());
-                    if (a instanceof MessageId || a instanceof ByPass) {
+                    if (isPassField(a)) {
                         continue FieldLoop;
                     }
                 }
@@ -141,6 +140,14 @@ public abstract class MessageEncoder {
         }
 
         return size;
+    }
+
+    private static boolean isPassField(Annotation a) {
+        if (a instanceof MessageId || a instanceof ByPass
+                || a instanceof PayloadSize || a instanceof TotalSize) {
+            return true;
+        }
+        return false;
     }
 
     public byte[] data() {
