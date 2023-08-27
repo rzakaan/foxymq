@@ -21,6 +21,10 @@ public class Message extends MessageEncoder implements IMessage {
     public Message() {
     }
 
+    public Message(IMessageHeader header) {
+        messageHeader = header;
+    }
+
     @Override
     public byte[] encodeMessage() {
         // set size and byte buffer for encoded data
@@ -43,9 +47,9 @@ public class Message extends MessageEncoder implements IMessage {
     public String toString() {
         StringBuilder str = new StringBuilder();
         str.append(String.format("%s\n", getClass().getName()));
-        str.append(String.format("  |-> header  size  : %d\n", headerSize));
-        str.append(String.format("  |-> payload size   : %d\n", payloadSize));
-        str.append(String.format("  |-> total   size   : %d\n", headerSize + payloadSize));
+        str.append(String.format("  |-> header  size : %d\n", headerSize));
+        str.append(String.format("  |-> payload size : %d\n", payloadSize));
+        str.append(String.format("  |-> total   size : %d\n", headerSize + payloadSize));
 
         if (encoded != null) {
             str.append(String.format("  |-> byte buffer  : "));

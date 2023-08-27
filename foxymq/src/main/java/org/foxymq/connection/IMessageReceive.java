@@ -2,6 +2,6 @@ package org.foxymq.connection;
 
 import org.foxymq.message.Message;
 
-public interface MessageReceive {
+public interface IMessageReceive {
     void onMessageReceived(Message message);
 }

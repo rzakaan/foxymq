@@ -14,5 +14,5 @@ public class MsgTest extends Message {
 
     @ByPass
     int skipData = 0xff;
-    int intData = 4;
+    public int intData;
 }

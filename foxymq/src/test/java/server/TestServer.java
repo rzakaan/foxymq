@@ -1,18 +1,80 @@
 package server;
 
-import org.foxymq.connection.ConnectionFactory;
+import java.net.Socket;
+import org.foxymq.connection.Connection;
+import org.foxymq.connection.ConnectionBuilder;
 import org.foxymq.connection.IConnection;
+import org.foxymq.connection.IMessageReceive;
 import org.foxymq.connection.Mode;
+import org.foxymq.message.Message;
 import org.junit.jupiter.api.Test;
 
-public class TestServer {
-    @Test
-    public void TestCreateServerSocket(){
-        IConnection con = ConnectionFactory.createConnection("localhost", 8080);
-        con.setMode(Mode.SERVER);
-        con.start();
+import template.MsgHeader;
+import template.MsgTest;
 
-        // check socket
-        System.out.println(String.format("Connection created %s:%d", con.getHost(), con.getPort()));
+public class TestServer {
+    private static final int TEST_SOCK_PORT = 9998;
+    IMessageReceive messageReceive = new IMessageReceive() {
+        @Override
+        public void onMessageReceived(Message message) {
+            System.out.println(String.format("%s message received", message.toString()));
+        }
+    };
+
+    IConnection connectionRecevie = new IConnection() {
+        @Override
+        public void onClientConnected(Socket socket) {
+            System.out.println(String.format("Client connect from (:%d)", socket.getPort()));
+        }
+
+        @Override
+        public void onClientDisconnected(Socket socket) {
+            System.out.println(String.format("Client(%d) disconnect", socket.getPort()));
+        }
+    };
+
+    public void wait(int mseconds) {
+        try {
+            Thread.sleep(mseconds);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void TestCreateServerSocket() {
+
+        Connection server = new ConnectionBuilder(Mode.SERVER)
+                .port(TEST_SOCK_PORT)
+                .header(new MsgHeader())
+                .callback(connectionRecevie)
+                .callback(messageReceive)
+                .build();
+
+        Connection client = new ConnectionBuilder(Mode.CLIENT)
+                .header(new MsgHeader())
+                .host("0.0.0.0")
+                .port(TEST_SOCK_PORT)
+                .build();
+
+        server.start();
+
+        wait(1);
+
+        client.start();
+
+        MsgTest msgTest = new MsgTest();
+        msgTest.setMessageHeader(new MsgHeader(MsgTest.messageId));
+        msgTest.intData = 7;
+        byte[] actualData = msgTest.encodeMessage();
+        System.out.println(msgTest);
+        // client.sendMessageBroadcast(msgTest);
+
+        try {
+
+            System.in.read();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
