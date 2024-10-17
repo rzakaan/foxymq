@@ -1,10 +1,14 @@
 package template;
 
+import org.foxymq.annotation.TotalSize;
 import org.foxymq.message.IMessageHeader;
 import org.foxymq.message.Message;
 
 public class MsgHeader extends IMessageHeader {
     public int messageId;
+
+    @TotalSize
+    public static final int headerSize = 4;
 
     public MsgHeader() {
     }
@@ -14,7 +18,7 @@ public class MsgHeader extends IMessageHeader {
     }
 
     @Override
-    protected Message createMessage() {
+    public Message createMessage() {
         switch (messageId) {
             case MsgTest.messageId:
                 return new MsgTest();

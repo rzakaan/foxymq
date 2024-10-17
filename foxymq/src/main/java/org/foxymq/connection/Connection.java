@@ -4,12 +4,15 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -126,7 +129,7 @@ public class Connection {
                     clients.put(socket.getPort(), socket);
 
                     // read byte from socket
-                    // readClient(socket);
+                    readClient(socket);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -137,14 +140,15 @@ public class Connection {
     private void readClient(Socket socket) {
         new Thread(() -> {
             try {
-                InputStream inputStream = socket.getInputStream();
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader buffer = new BufferedReader(inputStreamReader);
+                InputStream is = socket.getInputStream();
+                InputStreamReader inputStreamReader = new InputStreamReader(is);
 
                 boolean bufferAvailable = true;
                 while (bufferAvailable) {
 
-                    // buffer.read();
+                    IMessageHeader header = parseHeader(is);
+                    Message m = parseMessage(is, header);
+
                     // callback interface
                     Message message = new Message();
                     message.setMessageHeader(header);
@@ -155,6 +159,36 @@ public class Connection {
                 e.printStackTrace();
             }
         }).start();
+    }
+
+    private IMessageHeader parseHeader(InputStream stream) throws Exception {
+        // not implemented -> header.getSize();
+        int length = 4;
+        byte[] bytes = new byte[8];
+        stream.read(bytes, 0, 4);
+
+        ByteBuffer buf = ByteBuffer.wrap(bytes);
+        header.setBuffer(buf);
+        // header.decode();
+        return header;
+    }
+
+    private Message parseMessage(InputStream stream, IMessageHeader header) throws Exception {
+        // parse message and decoding bytes
+        Message msg = header.createMessage();
+        Class clazz = msg.getClass();
+        short size = 0;
+        byte[] bytes;
+        try {
+            Method method = clazz.getDeclaredMethod("getSize");
+            size = (short) method.invoke(msg);
+            bytes = stream.readNBytes(size);
+            msg.decodeMessage(bytes);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return msg;
     }
 
     public void sendMessage(Message message, Socket socket) {

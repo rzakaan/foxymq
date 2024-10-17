@@ -51,24 +51,9 @@ public class TestServer {
                 .callback(messageReceive)
                 .build();
 
-        Connection client = new ConnectionBuilder(Mode.CLIENT)
-                .header(new MsgHeader())
-                .host("0.0.0.0")
-                .port(TEST_SOCK_PORT)
-                .build();
-
         server.start();
 
         wait(1);
-
-        client.start();
-
-        MsgTest msgTest = new MsgTest();
-        msgTest.setMessageHeader(new MsgHeader(MsgTest.messageId));
-        msgTest.intData = 7;
-        byte[] actualData = msgTest.encodeMessage();
-        System.out.println(msgTest);
-        // client.sendMessageBroadcast(msgTest);
 
         try {
 
@@ -76,5 +61,6 @@ public class TestServer {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
 }
